@@ -469,16 +469,16 @@ function showSlide(i, isFirst) {
   }
 }
 
-// ═══ INIT: wait for data, then start at NOS ═══
-// Show NOS logo while loading
-showLogoOverlay('nos');
-
+// ═══ INIT: load data first, then NOS logo, then first slide ═══
 loadAll().then(() => {
-  hideLogoOverlay();
-  // Wait for logo overlay to fade, then start slideshow
+  // Data is ready — show NOS logo intro
+  showLogoOverlay('nos');
+
+  // After logo displays 1.8s, activate first slide and fade logo
   setTimeout(() => {
-    showSlide(0, true);
-  }, 900);
+    activateSlide(0);
+    setTimeout(() => hideLogoOverlay(), 400);
+  }, 1800);
 });
 
 // Refresh news every 60s
