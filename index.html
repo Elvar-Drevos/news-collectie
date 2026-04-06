@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Digital Signage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   html, body {
@@ -28,6 +30,7 @@
     pointer-events: none;
     overflow: hidden;
     z-index: 1;
+    will-change: opacity;
   }
   .slide.active { opacity: 1; pointer-events: auto; z-index: 2; }
   .slide.prev { opacity: 0; z-index: 1; transition: opacity 2.5s ease-in-out; }
@@ -43,11 +46,12 @@
     position: absolute; inset: 0;
     background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 100%);
   }
+  /* Soft glow using radial gradient instead of blur filter (Pi-friendly) */
   #pt-glow {
     position: absolute;
-    width: 40vmax; height: 40vmax;
+    width: 60vmax; height: 60vmax;
     border-radius: 50%;
-    filter: blur(100px);
+    background: radial-gradient(circle, var(--glow-color, #f36d21) 0%, transparent 70%);
   }
   #pt-logo {
     position: relative; z-index: 2;
@@ -58,23 +62,15 @@
     height: 2px;
   }
 
-  /* ═══ PROGRESS BAR ═══ */
-  #progress-bar {
-    position: fixed; top: 0; left: 0; height: 3px; z-index: 100;
-    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
-    background-size: 300% 100%;
-    animation: shimmer 3s linear infinite;
-  }
-  @keyframes shimmer { 0%{background-position:0% 0} 100%{background-position:300% 0} }
-
   /* ═══ NEWS SLIDE DESIGN ═══ */
   .news-bg-full {
     position: absolute; inset: -5%;
     width: 110%; height: 110%;
     object-fit: cover; object-position: center;
-    filter: brightness(0.55) saturate(1.2);
+    filter: brightness(0.55);
     transform: scale(1);
     transition: transform 12s ease-out;
+    will-change: transform;
   }
   .slide.active .news-bg-full { transform: scale(1.08); }
 
@@ -111,15 +107,14 @@
     background: rgba(255,255,255,0.08);
     border-radius: 100px;
     border: 1px solid rgba(255,255,255,0.06);
-    backdrop-filter: blur(10px);
   }
 
   .news-title {
     font-size: min(3.5vw, 5.5vh);
-    font-weight: 800; line-height: 1.15;
+    font-weight: 900; line-height: 1.15;
     color: #fff; margin-bottom: 2vh;
     max-width: 70%;
-    text-shadow: 0 2px 30px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 20px rgba(0,0,0,0.5);
   }
 
   .news-desc-area {
@@ -159,8 +154,6 @@
 <body>
 
 <div id="wrapper">
-  <div id="progress-bar"></div>
-
   <div id="pt-overlay">
     <div id="pt-scrim" style="opacity:0"></div>
     <div id="pt-glow" style="opacity:0"></div>
@@ -178,7 +171,7 @@
         <img class="source-logo" src="https://static.cdnlogo.com/logos/n/78/nos.svg" alt="NOS">
         <span class="news-ago" id="nos-ago-0"></span>
       </div>
-      <h1 class="news-title" id="nos-title-0">Laden...</h1>
+      <h1 class="news-title" id="nos-title-0"></h1>
       <div class="news-desc-area" id="nos-desc-area-0"><p id="nos-desc-0"></p></div>
     </div>
   </div>
@@ -193,7 +186,7 @@
         <img class="source-logo" src="https://static.cdnlogo.com/logos/n/78/nos.svg" alt="NOS">
         <span class="news-ago" id="nos-ago-1"></span>
       </div>
-      <h1 class="news-title" id="nos-title-1">Laden...</h1>
+      <h1 class="news-title" id="nos-title-1"></h1>
       <div class="news-desc-area" id="nos-desc-area-1"><p id="nos-desc-1"></p></div>
     </div>
   </div>
@@ -208,7 +201,7 @@
         <img class="source-logo" src="https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png" alt="NYT">
         <span class="news-ago" id="nyt-ago-0"></span>
       </div>
-      <h1 class="news-title" id="nyt-title-0">Loading...</h1>
+      <h1 class="news-title" id="nyt-title-0"></h1>
       <div class="news-desc-area" id="nyt-desc-area-0"><p id="nyt-desc-0"></p></div>
     </div>
   </div>
@@ -223,7 +216,7 @@
         <img class="source-logo" src="https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png" alt="NYT">
         <span class="news-ago" id="nyt-ago-1"></span>
       </div>
-      <h1 class="news-title" id="nyt-title-1">Loading...</h1>
+      <h1 class="news-title" id="nyt-title-1"></h1>
       <div class="news-desc-area" id="nyt-desc-area-1"><p id="nyt-desc-1"></p></div>
     </div>
   </div>
@@ -238,7 +231,7 @@
         <img class="source-logo" src="https://static.cdnlogo.com/logos/s/65/sky-news.svg" alt="Sky News">
         <span class="news-ago" id="sky-ago-0"></span>
       </div>
-      <h1 class="news-title" id="sky-title-0">Loading...</h1>
+      <h1 class="news-title" id="sky-title-0"></h1>
       <div class="news-desc-area" id="sky-desc-area-0"><p id="sky-desc-0"></p></div>
     </div>
   </div>
@@ -253,7 +246,7 @@
         <img class="source-logo" src="https://static.cdnlogo.com/logos/s/65/sky-news.svg" alt="Sky News">
         <span class="news-ago" id="sky-ago-1"></span>
       </div>
-      <h1 class="news-title" id="sky-title-1">Loading...</h1>
+      <h1 class="news-title" id="sky-title-1"></h1>
       <div class="news-desc-area" id="sky-desc-area-1"><p id="sky-desc-1"></p></div>
     </div>
   </div>
@@ -295,21 +288,20 @@ function parseRSSItems(xml) {
   });
 }
 
-// Try corsproxy (fresh data), fallback to rss2json (cached but reliable)
 async function fetchRSS(url) {
-  // Method 1: corsproxy.io — real-time, no caching
+  // Try corsproxy (fresh data)
   try {
     const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
-    if (!resp.ok) throw new Error('corsproxy HTTP ' + resp.status);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const xml = await resp.text();
     const items = parseRSSItems(xml);
     if (items.length) return items;
-  } catch (e) { console.warn('corsproxy failed, trying rss2json:', e.message); }
+  } catch (e) { console.warn('corsproxy failed:', e.message); }
 
-  // Method 2: rss2json — may be cached but works reliably
+  // Fallback: rss2json (cached but reliable)
   try {
     const resp = await fetch('https://api.rss2json.com/v1/api.json?count=10&rss_url=' + encodeURIComponent(url));
-    if (!resp.ok) throw new Error('rss2json HTTP ' + resp.status);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     if (data.items?.length) {
       return data.items.map(item => {
@@ -323,7 +315,7 @@ async function fetchRSS(url) {
         };
       });
     }
-  } catch (e) { console.warn('rss2json also failed:', e.message); }
+  } catch (e) { console.warn('rss2json failed:', e.message); }
 
   return [];
 }
@@ -350,7 +342,6 @@ function loadAll() {
     fetchNews('https://feeds.skynews.com/feeds/rss/world.xml', 'sky', 2)
   ]);
 }
-setInterval(loadAll, 60000);
 
 // ═══ AUTO-SCROLL ═══
 function startScroll(slideEl) {
@@ -389,16 +380,14 @@ function showLogoOverlay(source) {
   const h = Math.min(window.innerWidth * 0.08, window.innerHeight * 0.12);
   const lw = Math.min(window.innerWidth * 0.2, 200);
 
-  // Reset everything instantly
   S(ptScrim, { opacity: '0', transition: 'none' });
-  S(ptGlow,  { opacity: '0', transition: 'none', background: info.color, transform: 'scale(0.3)' });
+  S(ptGlow,  { opacity: '0', transition: 'none', '--glow-color': info.color, transform: 'scale(0.3)' });
   S(ptLogo,  { opacity: '0', transition: 'none', height: h + 'px', transform: 'scale(0.5)',
                filter: info.invert ? 'invert(1)' : 'none' });
   ptLogo.src = info.logo;
   S(ptLine,  { opacity: '0', transition: 'none', width: '0px', background: info.color });
   void ptScrim.offsetHeight;
 
-  // Animate in: scrim + glow + logo + line
   S(ptScrim, { opacity: '1', transition: 'opacity 0.5s ease' });
   S(ptGlow,  { opacity: '0.3', transform: 'scale(1)', transition: 'opacity 0.8s ease, transform 1.2s ease' });
   S(ptLogo,  { opacity: '1', transform: 'scale(1)', transition: 'opacity 0.4s ease 0.1s, transform 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s' });
@@ -422,7 +411,6 @@ function hideLogoOverlay() {
 // ═══ SLIDESHOW ═══
 const slides = document.querySelectorAll('.slide');
 let cur = 0, timer = null;
-const pbar = document.getElementById('progress-bar');
 
 function getSource(i) { return slides[i]?.dataset.source || ''; }
 
@@ -447,13 +435,6 @@ function activateSlide(i) {
   if (ago?.dataset.pubdate) ago.textContent = timeAgo(ago.dataset.pubdate);
 
   const dur = parseInt(next.dataset.duration) || 15000;
-  pbar.style.transition = 'none';
-  pbar.style.width = '0%';
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    pbar.style.transition = 'width ' + dur + 'ms linear';
-    pbar.style.width = '100%';
-  }));
-
   clearTimeout(timer);
   timer = setTimeout(() => showSlide((cur + 1) % slides.length), dur);
 }
@@ -475,27 +456,33 @@ function showSlide(i, isFirst) {
   const platformChange = isFirst || curSource !== nextSource;
 
   if (platformChange) {
-    // Show logo overlay
     showLogoOverlay(nextSource);
-
     if (!isFirst) deactivateSlide(cur);
 
-    // After logo displays for 1.5s, activate new slide and fade logo out
     setTimeout(() => {
       activateSlide(i);
-      // Small delay so slide starts appearing, then hide logo
       setTimeout(() => hideLogoOverlay(), 400);
     }, isFirst ? 1500 : 1800);
   } else {
-    // Same platform: simple crossfade
     deactivateSlide(cur);
     activateSlide(i);
   }
 }
 
-// Start slideshow immediately, load news in parallel
-showSlide(0, true);
-loadAll();
+// ═══ INIT: wait for data, then start at NOS ═══
+// Show NOS logo while loading
+showLogoOverlay('nos');
+
+loadAll().then(() => {
+  hideLogoOverlay();
+  // Wait for logo overlay to fade, then start slideshow
+  setTimeout(() => {
+    showSlide(0, true);
+  }, 900);
+});
+
+// Refresh news every 60s
+setInterval(loadAll, 60000);
 </script>
 </body>
 </html>
