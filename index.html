@@ -149,9 +149,47 @@
     width: 100%; height: 4px; z-index: 3;
     background: linear-gradient(90deg, #c41230, #c41230 30%, transparent);
   }
+
+  /* ═══ LOADING SCREEN ═══ */
+  #loading-screen {
+    position: fixed; inset: 0; z-index: 100;
+    background: #0a0a0a;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 3vh;
+    transition: opacity 0.8s ease;
+  }
+  #loading-screen.fade-out { opacity: 0; pointer-events: none; }
+  .loading-logos {
+    display: flex; align-items: center; gap: 3vw;
+  }
+  .loading-logos img {
+    height: min(3vw, 4.5vh);
+    object-fit: contain;
+    opacity: 0.3;
+    transition: opacity 0.5s ease;
+  }
+  .loading-logos img.loaded { opacity: 1; }
+  .loading-logos img.logo-nyt { filter: invert(1); }
+  .loading-spinner {
+    width: min(3vw, 4vh); height: min(3vw, 4vh);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-top-color: rgba(255,255,255,0.5);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
+
+<div id="loading-screen">
+  <div class="loading-logos">
+    <img id="ll-nos" src="https://static.cdnlogo.com/logos/n/78/nos.svg" alt="NOS">
+    <img id="ll-nyt" class="logo-nyt" src="https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png" alt="NYT">
+    <img id="ll-sky" src="https://static.cdnlogo.com/logos/s/65/sky-news.svg" alt="Sky">
+  </div>
+  <div class="loading-spinner"></div>
+</div>
 
 <div id="wrapper">
   <div id="pt-overlay">
@@ -469,17 +507,54 @@ function showSlide(i, isFirst) {
   }
 }
 
-// ═══ INIT: load data first, then NOS logo, then first slide ═══
-loadAll().then(() => {
-  // Data is ready — show NOS logo intro
-  showLogoOverlay('nos');
+// ═══ PRELOAD IMAGE ═══
+function preloadImage(src) {
+  return new Promise(resolve => {
+    if (!src || src === PH) return resolve();
+    const img = new Image();
+    img.onload = resolve;
+    img.onerror = resolve; // don't block on failed images
+    img.src = src;
+    // timeout safety: resolve after 8s even if image hasn't loaded
+    setTimeout(resolve, 8000);
+  });
+}
 
-  // After logo displays 1.8s, activate first slide and fade logo
+// ═══ INIT ═══
+const loadingScreen = document.getElementById('loading-screen');
+
+async function initSignage() {
+  // Load all feeds, lighting up logos as each source completes
+  const nosP = fetchNews('https://feeds.nos.nl/nosnieuwsalgemeen', 'nos', 2)
+    .then(() => document.getElementById('ll-nos').classList.add('loaded'));
+  const nytP = fetchNews('https://rss.nytimes.com/services/xml/rss/nyt/World.xml', 'nyt', 2)
+    .then(() => document.getElementById('ll-nyt').classList.add('loaded'));
+  const skyP = fetchNews('https://feeds.skynews.com/feeds/rss/world.xml', 'sky', 2)
+    .then(() => document.getElementById('ll-sky').classList.add('loaded'));
+
+  await Promise.all([nosP, nytP, skyP]);
+
+  // Now preload all slide background images
+  const imgPromises = Array.from(document.querySelectorAll('.news-bg-full')).map(img =>
+    preloadImage(img.src)
+  );
+  await Promise.all(imgPromises);
+
+  // Everything ready — fade out loading screen
+  loadingScreen.classList.add('fade-out');
+
+  // Wait for fade-out, then show NOS logo intro
+  await new Promise(r => setTimeout(r, 800));
+  loadingScreen.style.display = 'none';
+
+  showLogoOverlay('nos');
   setTimeout(() => {
     activateSlide(0);
     setTimeout(() => hideLogoOverlay(), 400);
   }, 1800);
-});
+}
+
+initSignage();
 
 // Refresh news every 60s
 setInterval(loadAll, 60000);
