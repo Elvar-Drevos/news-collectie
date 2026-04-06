@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Signage</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    font-family: 'Inter', sans-serif;
+    background: #000; color: #fff;
+    width: 100%; height: 100%;
+    overflow: hidden;
+  }
+
+  #wrapper {
+    width: 100vw; height: 100vh;
+    position: relative; overflow: hidden;
+  }
+
+  /* ═══ SLIDES ═══ */
+  .slide {
+    position: absolute; inset: 0;
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; z-index: 2; }
+  .slide.prev { opacity: 0; z-index: 1; transition: opacity 2.5s ease-in-out; }
+
+  /* ═══ PLATFORM TRANSITION ═══ */
+  #pt-overlay {
+    position: fixed; inset: 0; z-index: 50;
+    pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 2vh;
+  }
+  #pt-scrim {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 100%);
+  }
+  #pt-glow {
+    position: absolute;
+    width: 40vmax; height: 40vmax;
+    border-radius: 50%;
+    filter: blur(100px);
+  }
+  #pt-logo {
+    position: relative; z-index: 2;
+    object-fit: contain;
+  }
+  #pt-line {
+    position: relative; z-index: 2;
+    height: 2px;
+  }
+
+  /* ═══ PROGRESS BAR ═══ */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px; z-index: 100;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+    background-size: 300% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+  @keyframes shimmer { 0%{background-position:0% 0} 100%{background-position:300% 0} }
+
+  /* ═══ NEWS SLIDE DESIGN ═══ */
+  .news-bg-full {
+    position: absolute; inset: -5%;
+    width: 110%; height: 110%;
+    object-fit: cover; object-position: center;
+    filter: brightness(0.55) saturate(1.2);
+    transform: scale(1);
+    transition: transform 12s ease-out;
+  }
+  .slide.active .news-bg-full { transform: scale(1.08); }
+
+  .news-gradient { position: absolute; inset: 0; z-index: 1; }
+  .news-gradient-bottom {
+    background: linear-gradient(0deg,
+      rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 25%,
+      rgba(0,0,0,0.1) 55%, transparent 100%);
+  }
+  .news-gradient-vignette {
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.5) 100%);
+  }
+
+  .news-content {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 5vh 5vw;
+  }
+
+  .news-source-bar {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 2.5vh;
+  }
+  .news-source-bar img.source-logo {
+    height: min(2.4vw, 3.8vh);
+    object-fit: contain;
+  }
+  .news-source-bar .news-ago {
+    font-size: min(0.9vw, 1.4vh);
+    color: rgba(255,255,255,0.4);
+    font-weight: 500;
+    padding: 0.4vh 1vw;
+    background: rgba(255,255,255,0.08);
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+  }
+
+  .news-title {
+    font-size: min(3.5vw, 5.5vh);
+    font-weight: 800; line-height: 1.15;
+    color: #fff; margin-bottom: 2vh;
+    max-width: 70%;
+    text-shadow: 0 2px 30px rgba(0,0,0,0.5);
+  }
+
+  .news-desc-area {
+    max-width: 55%; max-height: 18vh;
+    overflow: hidden; position: relative;
+  }
+  .news-desc-area p {
+    font-size: min(1.2vw, 1.9vh);
+    line-height: 1.8;
+    color: rgba(255,255,255,0.7);
+    font-weight: 400;
+  }
+
+  /* ── Source accents ── */
+  .nos-accent .source-logo { filter: none; }
+  .nos-accent::before {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 4px; z-index: 3;
+    background: linear-gradient(90deg, #f36d21, #f36d21 30%, transparent);
+  }
+  .nyt-accent .news-title { color: #f0f0f0; }
+  .nyt-accent .source-logo { filter: invert(1); height: min(1.8vw, 2.8vh) !important; }
+  .nyt-accent::before {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 4px; z-index: 3;
+    background: linear-gradient(90deg, #999, #999 30%, transparent);
+  }
+  .sky-accent .news-title { color: #e8eef8; }
+  .sky-accent .source-logo { filter: none; }
+  .sky-accent::before {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 4px; z-index: 3;
+    background: linear-gradient(90deg, #c41230, #c41230 30%, transparent);
+  }
+</style>
+</head>
+<body>
+
+<div id="wrapper">
+  <div id="progress-bar"></div>
+
+  <div id="pt-overlay">
+    <div id="pt-scrim" style="opacity:0"></div>
+    <div id="pt-glow" style="opacity:0"></div>
+    <img id="pt-logo" src="" alt="" style="opacity:0; height:0">
+    <div id="pt-line" style="opacity:0; width:0"></div>
+  </div>
+
+  <!-- NOS 1 -->
+  <div class="slide nos-accent" id="nos-0" data-duration="15000" data-source="nos">
+    <img class="news-bg-full" id="nos-img-0" src="" alt="">
+    <div class="news-gradient news-gradient-bottom"></div>
+    <div class="news-gradient news-gradient-vignette"></div>
+    <div class="news-content">
+      <div class="news-source-bar">
+        <img class="source-logo" src="https://static.cdnlogo.com/logos/n/78/nos.svg" alt="NOS">
+        <span class="news-ago" id="nos-ago-0"></span>
+      </div>
+      <h1 class="news-title" id="nos-title-0">Laden...</h1>
+      <div class="news-desc-area" id="nos-desc-area-0"><p id="nos-desc-0"></p></div>
+    </div>
+  </div>
+
+  <!-- NOS 2 -->
+  <div class="slide nos-accent" id="nos-1" data-duration="15000" data-source="nos">
+    <img class="news-bg-full" id="nos-img-1" src="" alt="">
+    <div class="news-gradient news-gradient-bottom"></div>
+    <div class="news-gradient news-gradient-vignette"></div>
+    <div class="news-content">
+      <div class="news-source-bar">
+        <img class="source-logo" src="https://static.cdnlogo.com/logos/n/78/nos.svg" alt="NOS">
+        <span class="news-ago" id="nos-ago-1"></span>
+      </div>
+      <h1 class="news-title" id="nos-title-1">Laden...</h1>
+      <div class="news-desc-area" id="nos-desc-area-1"><p id="nos-desc-1"></p></div>
+    </div>
+  </div>
+
+  <!-- NYT 1 -->
+  <div class="slide nyt-accent" id="nyt-0" data-duration="15000" data-source="nyt">
+    <img class="news-bg-full" id="nyt-img-0" src="" alt="">
+    <div class="news-gradient news-gradient-bottom"></div>
+    <div class="news-gradient news-gradient-vignette"></div>
+    <div class="news-content">
+      <div class="news-source-bar">
+        <img class="source-logo" src="https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png" alt="NYT">
+        <span class="news-ago" id="nyt-ago-0"></span>
+      </div>
+      <h1 class="news-title" id="nyt-title-0">Loading...</h1>
+      <div class="news-desc-area" id="nyt-desc-area-0"><p id="nyt-desc-0"></p></div>
+    </div>
+  </div>
+
+  <!-- NYT 2 -->
+  <div class="slide nyt-accent" id="nyt-1" data-duration="15000" data-source="nyt">
+    <img class="news-bg-full" id="nyt-img-1" src="" alt="">
+    <div class="news-gradient news-gradient-bottom"></div>
+    <div class="news-gradient news-gradient-vignette"></div>
+    <div class="news-content">
+      <div class="news-source-bar">
+        <img class="source-logo" src="https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png" alt="NYT">
+        <span class="news-ago" id="nyt-ago-1"></span>
+      </div>
+      <h1 class="news-title" id="nyt-title-1">Loading...</h1>
+      <div class="news-desc-area" id="nyt-desc-area-1"><p id="nyt-desc-1"></p></div>
+    </div>
+  </div>
+
+  <!-- SKY 1 -->
+  <div class="slide sky-accent" id="sky-0" data-duration="15000" data-source="sky">
+    <img class="news-bg-full" id="sky-img-0" src="" alt="">
+    <div class="news-gradient news-gradient-bottom"></div>
+    <div class="news-gradient news-gradient-vignette"></div>
+    <div class="news-content">
+      <div class="news-source-bar">
+        <img class="source-logo" src="https://static.cdnlogo.com/logos/s/65/sky-news.svg" alt="Sky News">
+        <span class="news-ago" id="sky-ago-0"></span>
+      </div>
+      <h1 class="news-title" id="sky-title-0">Loading...</h1>
+      <div class="news-desc-area" id="sky-desc-area-0"><p id="sky-desc-0"></p></div>
+    </div>
+  </div>
+
+  <!-- SKY 2 -->
+  <div class="slide sky-accent" id="sky-1" data-duration="15000" data-source="sky">
+    <img class="news-bg-full" id="sky-img-1" src="" alt="">
+    <div class="news-gradient news-gradient-bottom"></div>
+    <div class="news-gradient news-gradient-vignette"></div>
+    <div class="news-content">
+      <div class="news-source-bar">
+        <img class="source-logo" src="https://static.cdnlogo.com/logos/s/65/sky-news.svg" alt="Sky News">
+        <span class="news-ago" id="sky-ago-1"></span>
+      </div>
+      <h1 class="news-title" id="sky-title-1">Loading...</h1>
+      <div class="news-desc-area" id="sky-desc-area-1"><p id="sky-desc-1"></p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ TIME AGO ═══
+function timeAgo(d) {
+  const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
+  if (s < 60) return 'Zojuist';
+  if (s < 3600) return Math.floor(s / 60) + ' min geleden';
+  if (s < 86400) return Math.floor(s / 3600) + ' uur geleden';
+  return Math.floor(s / 86400) + ' dag(en) geleden';
+}
+
+// ═══ NEWS ═══
+const PH = 'data:image/svg+xml,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080"><rect fill="#111" width="1920" height="1080"/></svg>'
+);
+
+function parseRSSItems(xml) {
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  return Array.from(doc.querySelectorAll('item')).map(item => {
+    const get = tag => item.querySelector(tag)?.textContent || '';
+    let img = '';
+    const media = item.querySelector('content[url], thumbnail[url]');
+    if (media) img = media.getAttribute('url');
+    if (!img) {
+      const enc = item.querySelector('enclosure[url]');
+      if (enc && (enc.getAttribute('type') || '').startsWith('image')) img = enc.getAttribute('url');
+    }
+    if (!img) {
+      const m = get('description').match(/<img[^>]+src="([^"]+)"/);
+      if (m) img = m[1];
+    }
+    const tmp = document.createElement('div');
+    tmp.innerHTML = get('description');
+    return { title: get('title'), description: tmp.textContent || '', pubDate: get('pubDate'), image: img };
+  });
+}
+
+// Try corsproxy (fresh data), fallback to rss2json (cached but reliable)
+async function fetchRSS(url) {
+  // Method 1: corsproxy.io — real-time, no caching
+  try {
+    const resp = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+    if (!resp.ok) throw new Error('corsproxy HTTP ' + resp.status);
+    const xml = await resp.text();
+    const items = parseRSSItems(xml);
+    if (items.length) return items;
+  } catch (e) { console.warn('corsproxy failed, trying rss2json:', e.message); }
+
+  // Method 2: rss2json — may be cached but works reliably
+  try {
+    const resp = await fetch('https://api.rss2json.com/v1/api.json?count=10&rss_url=' + encodeURIComponent(url));
+    if (!resp.ok) throw new Error('rss2json HTTP ' + resp.status);
+    const data = await resp.json();
+    if (data.items?.length) {
+      return data.items.map(item => {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = item.description;
+        return {
+          title: item.title,
+          description: tmp.textContent || '',
+          pubDate: item.pubDate,
+          image: item.thumbnail || item.enclosure?.link || (() => { const m = item.description?.match(/<img[^>]+src="([^"]+)"/); return m ? m[1] : ''; })()
+        };
+      });
+    }
+  } catch (e) { console.warn('rss2json also failed:', e.message); }
+
+  return [];
+}
+
+async function fetchNews(url, pre, n) {
+  try {
+    const items = await fetchRSS(url);
+    if (!items.length) return;
+    items.slice(0, n).forEach((item, i) => {
+      const el = id => document.getElementById(pre + '-' + id + '-' + i);
+      const title = el('title'), desc = el('desc'), img = el('img'), ago = el('ago');
+      if (title) title.textContent = item.title;
+      if (ago) { ago.textContent = timeAgo(item.pubDate); ago.dataset.pubdate = item.pubDate; }
+      if (desc) desc.textContent = item.description;
+      if (img) img.src = item.image || PH;
+    });
+  } catch (e) { console.warn('News err (' + pre + '):', e); }
+}
+
+function loadAll() {
+  return Promise.all([
+    fetchNews('https://feeds.nos.nl/nosnieuwsalgemeen', 'nos', 2),
+    fetchNews('https://rss.nytimes.com/services/xml/rss/nyt/World.xml', 'nyt', 2),
+    fetchNews('https://feeds.skynews.com/feeds/rss/world.xml', 'sky', 2)
+  ]);
+}
+setInterval(loadAll, 60000);
+
+// ═══ AUTO-SCROLL ═══
+function startScroll(slideEl) {
+  const area = slideEl.querySelector('.news-desc-area');
+  if (!area) return;
+  const p = area.querySelector('p');
+  if (!p) return;
+  p.style.transition = 'none';
+  p.style.transform = 'translateY(0)';
+  void p.offsetHeight;
+  const ov = p.scrollHeight - area.clientHeight;
+  if (ov > 10) {
+    setTimeout(() => {
+      p.style.transition = 'transform ' + (ov / 28) + 's linear';
+      p.style.transform = 'translateY(-' + ov + 'px)';
+    }, 3500);
+  }
+}
+
+// ═══ PLATFORM TRANSITION ═══
+const ptScrim = document.getElementById('pt-scrim');
+const ptGlow  = document.getElementById('pt-glow');
+const ptLogo  = document.getElementById('pt-logo');
+const ptLine  = document.getElementById('pt-line');
+
+const platformInfo = {
+  nos: { logo: 'https://static.cdnlogo.com/logos/n/78/nos.svg', color: '#f36d21', invert: false },
+  nyt: { logo: 'https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png', color: '#f0f0f0', invert: true },
+  sky: { logo: 'https://static.cdnlogo.com/logos/s/65/sky-news.svg', color: '#c41230', invert: false }
+};
+
+function S(el, props) { Object.assign(el.style, props); }
+
+function showLogoOverlay(source) {
+  const info = platformInfo[source];
+  const h = Math.min(window.innerWidth * 0.08, window.innerHeight * 0.12);
+  const lw = Math.min(window.innerWidth * 0.2, 200);
+
+  // Reset everything instantly
+  S(ptScrim, { opacity: '0', transition: 'none' });
+  S(ptGlow,  { opacity: '0', transition: 'none', background: info.color, transform: 'scale(0.3)' });
+  S(ptLogo,  { opacity: '0', transition: 'none', height: h + 'px', transform: 'scale(0.5)',
+               filter: info.invert ? 'invert(1)' : 'none' });
+  ptLogo.src = info.logo;
+  S(ptLine,  { opacity: '0', transition: 'none', width: '0px', background: info.color });
+  void ptScrim.offsetHeight;
+
+  // Animate in: scrim + glow + logo + line
+  S(ptScrim, { opacity: '1', transition: 'opacity 0.5s ease' });
+  S(ptGlow,  { opacity: '0.3', transform: 'scale(1)', transition: 'opacity 0.8s ease, transform 1.2s ease' });
+  S(ptLogo,  { opacity: '1', transform: 'scale(1)', transition: 'opacity 0.4s ease 0.1s, transform 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s' });
+  S(ptLine,  { opacity: '1', width: lw + 'px', transition: 'opacity 0.5s ease 0.2s, width 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s' });
+}
+
+function hideLogoOverlay() {
+  S(ptScrim, { opacity: '0', transition: 'opacity 0.8s ease' });
+  S(ptGlow,  { opacity: '0', transform: 'scale(0.5)', transition: 'opacity 0.5s ease, transform 0.5s ease' });
+  S(ptLogo,  { opacity: '0', transform: 'scale(0.9)', transition: 'opacity 0.5s ease, transform 0.5s ease' });
+  S(ptLine,  { opacity: '0', width: '0px', transition: 'opacity 0.3s ease, width 0.3s ease' });
+
+  setTimeout(() => {
+    S(ptScrim, { opacity: '0', transition: 'none' });
+    S(ptGlow,  { opacity: '0', transition: 'none' });
+    S(ptLogo,  { opacity: '0', height: '0', transition: 'none' });
+    S(ptLine,  { opacity: '0', transition: 'none' });
+  }, 900);
+}
+
+// ═══ SLIDESHOW ═══
+const slides = document.querySelectorAll('.slide');
+let cur = 0, timer = null;
+const pbar = document.getElementById('progress-bar');
+
+function getSource(i) { return slides[i]?.dataset.source || ''; }
+
+function activateSlide(i) {
+  const next = slides[i];
+  next.classList.add('active');
+  cur = i;
+
+  const newBg = next.querySelector('.news-bg-full');
+  if (newBg) {
+    newBg.style.transition = 'none';
+    newBg.style.transform = 'scale(1)';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      newBg.style.transition = 'transform 12s ease-out';
+      newBg.style.transform = 'scale(1.08)';
+    }));
+  }
+
+  startScroll(next);
+
+  const ago = next.querySelector('.news-ago');
+  if (ago?.dataset.pubdate) ago.textContent = timeAgo(ago.dataset.pubdate);
+
+  const dur = parseInt(next.dataset.duration) || 15000;
+  pbar.style.transition = 'none';
+  pbar.style.width = '0%';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    pbar.style.transition = 'width ' + dur + 'ms linear';
+    pbar.style.width = '100%';
+  }));
+
+  clearTimeout(timer);
+  timer = setTimeout(() => showSlide((cur + 1) % slides.length), dur);
+}
+
+function deactivateSlide(i) {
+  const s = slides[i];
+  s.classList.remove('active');
+  s.classList.add('prev');
+  setTimeout(() => {
+    s.classList.remove('prev');
+    const bg = s.querySelector('.news-bg-full');
+    if (bg) { bg.style.transition = 'none'; bg.style.transform = 'scale(1)'; }
+  }, 2600);
+}
+
+function showSlide(i, isFirst) {
+  const nextSource = getSource(i);
+  const curSource = getSource(cur);
+  const platformChange = isFirst || curSource !== nextSource;
+
+  if (platformChange) {
+    // Show logo overlay
+    showLogoOverlay(nextSource);
+
+    if (!isFirst) deactivateSlide(cur);
+
+    // After logo displays for 1.5s, activate new slide and fade logo out
+    setTimeout(() => {
+      activateSlide(i);
+      // Small delay so slide starts appearing, then hide logo
+      setTimeout(() => hideLogoOverlay(), 400);
+    }, isFirst ? 1500 : 1800);
+  } else {
+    // Same platform: simple crossfade
+    deactivateSlide(cur);
+    activateSlide(i);
+  }
+}
+
+// Start slideshow immediately, load news in parallel
+showSlide(0, true);
+loadAll();
+</script>
+</body>
+</html>
