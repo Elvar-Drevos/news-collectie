@@ -34,33 +34,9 @@
   }
   .slide.active { opacity: 1; pointer-events: auto; z-index: 2; }
   .slide.prev { opacity: 0; z-index: 1; transition: opacity 2.5s ease-in-out; }
-
-  /* ═══ PLATFORM TRANSITION ═══ */
-  #pt-overlay {
-    position: fixed; inset: 0; z-index: 50;
-    pointer-events: none;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 2vh;
-  }
-  #pt-scrim {
-    position: absolute; inset: 0;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 100%);
-  }
-  /* Soft glow using radial gradient instead of blur filter (Pi-friendly) */
-  #pt-glow {
-    position: absolute;
-    width: 60vmax; height: 60vmax;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--glow-color, #f36d21) 0%, transparent 70%);
-  }
-  #pt-logo {
-    position: relative; z-index: 2;
-    object-fit: contain;
-  }
-  #pt-line {
-    position: relative; z-index: 2;
-    height: 2px;
-  }
+  /* Instant cut: no transition when coming from intro */
+  .slide.instant { transition: none; }
+  .intro-slide.instant-out { transition: none; opacity: 0; }
 
   /* ═══ NEWS SLIDE DESIGN ═══ */
   .news-bg-full {
@@ -150,6 +126,56 @@
     background: linear-gradient(90deg, #c41230, #c41230 30%, transparent);
   }
 
+  /* ═══ INTRO SLIDES ═══ */
+  .intro-slide {
+    position: absolute; inset: 0;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+    pointer-events: none;
+    z-index: 1;
+    will-change: opacity;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 2.5vh;
+  }
+  .intro-slide.active { opacity: 1; z-index: 2; }
+  .intro-slide.prev { opacity: 0; z-index: 1; transition: opacity 2s ease-in-out; }
+  .intro-bg {
+    position: absolute; inset: 0;
+  }
+  .intro-bg.nos-bg { background: radial-gradient(ellipse at center, #1a0d00 0%, #0a0a0a 70%); }
+  .intro-bg.nyt-bg { background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 70%); }
+  .intro-bg.sky-bg { background: radial-gradient(ellipse at center, #1a050a 0%, #0a0a0a 70%); }
+  .intro-glow {
+    position: absolute;
+    width: 50vmax; height: 50vmax;
+    border-radius: 50%;
+    opacity: 0.15;
+  }
+  .intro-glow.nos-glow { background: radial-gradient(circle, #f36d21, transparent 70%); }
+  .intro-glow.nyt-glow { background: radial-gradient(circle, #f0f0f0, transparent 70%); }
+  .intro-glow.sky-glow { background: radial-gradient(circle, #c41230, transparent 70%); }
+  .intro-logo {
+    position: relative; z-index: 2;
+    height: min(8vw, 12vh);
+    object-fit: contain;
+  }
+  .intro-logo.nyt-logo { filter: invert(1); }
+  .intro-label {
+    position: relative; z-index: 2;
+    font-size: min(1.8vw, 2.8vh);
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+  .intro-line {
+    position: relative; z-index: 2;
+    height: 2px; width: min(12vw, 150px);
+  }
+  .intro-line.nos-line { background: #f36d21; }
+  .intro-line.nyt-line { background: #999; }
+  .intro-line.sky-line { background: #c41230; }
+
   /* ═══ LOADING SCREEN ═══ */
   #loading-screen {
     position: fixed; inset: 0; z-index: 100;
@@ -192,11 +218,31 @@
 </div>
 
 <div id="wrapper">
-  <div id="pt-overlay">
-    <div id="pt-scrim" style="opacity:0"></div>
-    <div id="pt-glow" style="opacity:0"></div>
-    <img id="pt-logo" src="" alt="" style="opacity:0; height:0">
-    <div id="pt-line" style="opacity:0; width:0"></div>
+  <!-- NOS INTRO -->
+  <div class="intro-slide" id="intro-nos" data-duration="5000" data-source="nos" data-intro="true">
+    <div class="intro-bg nos-bg"></div>
+    <div class="intro-glow nos-glow"></div>
+    <img class="intro-logo" src="https://static.cdnlogo.com/logos/n/78/nos.svg" alt="NOS">
+    <div class="intro-line nos-line"></div>
+    <span class="intro-label">Headlines</span>
+  </div>
+
+  <!-- NYT INTRO -->
+  <div class="intro-slide" id="intro-nyt" data-duration="5000" data-source="nyt" data-intro="true">
+    <div class="intro-bg nyt-bg"></div>
+    <div class="intro-glow nyt-glow"></div>
+    <img class="intro-logo nyt-logo" src="https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png" alt="NYT">
+    <div class="intro-line nyt-line"></div>
+    <span class="intro-label">Headlines</span>
+  </div>
+
+  <!-- SKY INTRO -->
+  <div class="intro-slide" id="intro-sky" data-duration="5000" data-source="sky" data-intro="true">
+    <div class="intro-bg sky-bg"></div>
+    <div class="intro-glow sky-glow"></div>
+    <img class="intro-logo" src="https://static.cdnlogo.com/logos/s/65/sky-news.svg" alt="Sky News">
+    <div class="intro-line sky-line"></div>
+    <span class="intro-label">Headlines</span>
   </div>
 
   <!-- NOS 1 -->
@@ -230,7 +276,7 @@
   </div>
 
   <!-- NYT 1 -->
-  <div class="slide nyt-accent" id="nyt-0" data-duration="15000" data-source="nyt">
+  <div class="slide nyt-accent" id="nyt-0" data-duration="10000" data-source="nyt">
     <img class="news-bg-full" id="nyt-img-0" src="" alt="">
     <div class="news-gradient news-gradient-bottom"></div>
     <div class="news-gradient news-gradient-vignette"></div>
@@ -245,7 +291,7 @@
   </div>
 
   <!-- NYT 2 -->
-  <div class="slide nyt-accent" id="nyt-1" data-duration="15000" data-source="nyt">
+  <div class="slide nyt-accent" id="nyt-1" data-duration="10000" data-source="nyt">
     <img class="news-bg-full" id="nyt-img-1" src="" alt="">
     <div class="news-gradient news-gradient-bottom"></div>
     <div class="news-gradient news-gradient-vignette"></div>
@@ -260,7 +306,7 @@
   </div>
 
   <!-- SKY 1 -->
-  <div class="slide sky-accent" id="sky-0" data-duration="15000" data-source="sky">
+  <div class="slide sky-accent" id="sky-0" data-duration="10000" data-source="sky">
     <img class="news-bg-full" id="sky-img-0" src="" alt="">
     <div class="news-gradient news-gradient-bottom"></div>
     <div class="news-gradient news-gradient-vignette"></div>
@@ -275,7 +321,7 @@
   </div>
 
   <!-- SKY 2 -->
-  <div class="slide sky-accent" id="sky-1" data-duration="15000" data-source="sky">
+  <div class="slide sky-accent" id="sky-1" data-duration="10000" data-source="sky">
     <img class="news-bg-full" id="sky-img-1" src="" alt="">
     <div class="news-gradient news-gradient-bottom"></div>
     <div class="news-gradient news-gradient-vignette"></div>
@@ -399,64 +445,28 @@ function startScroll(slideEl) {
   }
 }
 
-// ═══ PLATFORM TRANSITION ═══
-const ptScrim = document.getElementById('pt-scrim');
-const ptGlow  = document.getElementById('pt-glow');
-const ptLogo  = document.getElementById('pt-logo');
-const ptLine  = document.getElementById('pt-line');
-
-const platformInfo = {
-  nos: { logo: 'https://static.cdnlogo.com/logos/n/78/nos.svg', color: '#f36d21', invert: false },
-  nyt: { logo: 'https://upload.wikimedia.org/wikipedia/commons/7/77/The_New_York_Times_logo.png', color: '#f0f0f0', invert: true },
-  sky: { logo: 'https://static.cdnlogo.com/logos/s/65/sky-news.svg', color: '#c41230', invert: false }
-};
-
-function S(el, props) { Object.assign(el.style, props); }
-
-function showLogoOverlay(source) {
-  const info = platformInfo[source];
-  const h = Math.min(window.innerWidth * 0.08, window.innerHeight * 0.12);
-  const lw = Math.min(window.innerWidth * 0.2, 200);
-
-  S(ptScrim, { opacity: '0', transition: 'none' });
-  S(ptGlow,  { opacity: '0', transition: 'none', '--glow-color': info.color, transform: 'scale(0.3)' });
-  S(ptLogo,  { opacity: '0', transition: 'none', height: h + 'px', transform: 'scale(0.5)',
-               filter: info.invert ? 'invert(1)' : 'none' });
-  ptLogo.src = info.logo;
-  S(ptLine,  { opacity: '0', transition: 'none', width: '0px', background: info.color });
-  void ptScrim.offsetHeight;
-
-  S(ptScrim, { opacity: '1', transition: 'opacity 0.5s ease' });
-  S(ptGlow,  { opacity: '0.3', transform: 'scale(1)', transition: 'opacity 0.8s ease, transform 1.2s ease' });
-  S(ptLogo,  { opacity: '1', transform: 'scale(1)', transition: 'opacity 0.4s ease 0.1s, transform 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s' });
-  S(ptLine,  { opacity: '1', width: lw + 'px', transition: 'opacity 0.5s ease 0.2s, width 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s' });
-}
-
-function hideLogoOverlay() {
-  S(ptScrim, { opacity: '0', transition: 'opacity 0.8s ease' });
-  S(ptGlow,  { opacity: '0', transform: 'scale(0.5)', transition: 'opacity 0.5s ease, transform 0.5s ease' });
-  S(ptLogo,  { opacity: '0', transform: 'scale(0.9)', transition: 'opacity 0.5s ease, transform 0.5s ease' });
-  S(ptLine,  { opacity: '0', width: '0px', transition: 'opacity 0.3s ease, width 0.3s ease' });
-
-  setTimeout(() => {
-    S(ptScrim, { opacity: '0', transition: 'none' });
-    S(ptGlow,  { opacity: '0', transition: 'none' });
-    S(ptLogo,  { opacity: '0', height: '0', transition: 'none' });
-    S(ptLine,  { opacity: '0', transition: 'none' });
-  }, 900);
-}
-
 // ═══ SLIDESHOW ═══
-const slides = document.querySelectorAll('.slide');
+// Slide order: NOS intro, NOS 1, NOS 2, NYT intro, NYT 1, NYT 2, SKY intro, SKY 1, SKY 2
+const allSlides = [
+  document.getElementById('intro-nos'),
+  document.getElementById('nos-0'),
+  document.getElementById('nos-1'),
+  document.getElementById('intro-nyt'),
+  document.getElementById('nyt-0'),
+  document.getElementById('nyt-1'),
+  document.getElementById('intro-sky'),
+  document.getElementById('sky-0'),
+  document.getElementById('sky-1')
+];
 let cur = 0, timer = null;
 
-function getSource(i) { return slides[i]?.dataset.source || ''; }
-
-function activateSlide(i) {
-  const next = slides[i];
+function activateSlide(i, instant) {
+  const next = allSlides[i];
+  if (instant) next.classList.add('instant');
   next.classList.add('active');
   cur = i;
 
+  // Ken Burns for news slides
   const newBg = next.querySelector('.news-bg-full');
   if (newBg) {
     newBg.style.transition = 'none';
@@ -464,47 +474,47 @@ function activateSlide(i) {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       newBg.style.transition = 'transform 12s ease-out';
       newBg.style.transform = 'scale(1.08)';
+      // Remove instant class after first frame so future transitions are normal
+      if (instant) next.classList.remove('instant');
     }));
   }
 
-  startScroll(next);
+  if (!next.dataset.intro) startScroll(next);
 
   const ago = next.querySelector('.news-ago');
   if (ago?.dataset.pubdate) ago.textContent = timeAgo(ago.dataset.pubdate);
 
   const dur = parseInt(next.dataset.duration) || 15000;
   clearTimeout(timer);
-  timer = setTimeout(() => showSlide((cur + 1) % slides.length), dur);
-}
 
-function deactivateSlide(i) {
-  const s = slides[i];
-  s.classList.remove('active');
-  s.classList.add('prev');
-  setTimeout(() => {
-    s.classList.remove('prev');
-    const bg = s.querySelector('.news-bg-full');
-    if (bg) { bg.style.transition = 'none'; bg.style.transform = 'scale(1)'; }
-  }, 2600);
-}
-
-function showSlide(i, isFirst) {
-  const nextSource = getSource(i);
-  const curSource = getSource(cur);
-  const platformChange = isFirst || curSource !== nextSource;
-
-  if (platformChange) {
-    showLogoOverlay(nextSource);
-    if (!isFirst) deactivateSlide(cur);
-
-    setTimeout(() => {
-      activateSlide(i);
-      setTimeout(() => hideLogoOverlay(), 400);
-    }, isFirst ? 1500 : 1800);
-  } else {
-    deactivateSlide(cur);
-    activateSlide(i);
+  // Stop after the last slide (don't loop)
+  if (i < allSlides.length - 1) {
+    timer = setTimeout(() => showSlide(i + 1), dur);
   }
+}
+
+function deactivateSlide(i, instant) {
+  const s = allSlides[i];
+  if (instant) {
+    s.classList.add('instant-out');
+    s.classList.remove('active');
+    setTimeout(() => s.classList.remove('instant-out'), 50);
+  } else {
+    s.classList.remove('active');
+    s.classList.add('prev');
+    setTimeout(() => {
+      s.classList.remove('prev');
+      const bg = s.querySelector('.news-bg-full');
+      if (bg) { bg.style.transition = 'none'; bg.style.transform = 'scale(1)'; }
+    }, 2600);
+  }
+}
+
+function showSlide(i) {
+  const prev = allSlides[cur];
+  const isFromIntro = prev && prev.dataset.intro;
+  deactivateSlide(cur, isFromIntro);
+  activateSlide(i, isFromIntro);
 }
 
 // ═══ PRELOAD IMAGE ═══
@@ -517,6 +527,20 @@ function preloadImage(src) {
     img.src = src;
     // timeout safety: resolve after 8s even if image hasn't loaded
     setTimeout(resolve, 8000);
+  });
+}
+
+// ═══ WAIT FOR PAGE VISIBLE (Yodeck loads pages in background) ═══
+function waitForVisible() {
+  return new Promise(resolve => {
+    if (document.visibilityState === 'visible') return resolve();
+    const handler = () => {
+      if (document.visibilityState === 'visible') {
+        document.removeEventListener('visibilitychange', handler);
+        resolve();
+      }
+    };
+    document.addEventListener('visibilitychange', handler);
   });
 }
 
@@ -534,30 +558,27 @@ async function initSignage() {
 
   await Promise.all([nosP, nytP, skyP]);
 
-  // Now preload all slide background images
+  // Preload all slide background images
   const imgPromises = Array.from(document.querySelectorAll('.news-bg-full')).map(img =>
     preloadImage(img.src)
   );
   await Promise.all(imgPromises);
 
-  // Everything ready — fade out loading screen
-  loadingScreen.classList.add('fade-out');
+  // Wait until page is actually visible on screen (Yodeck pre-renders in background)
+  await waitForVisible();
 
-  // Wait for fade-out, then show NOS logo intro
+  // Small extra delay to ensure Yodeck has fully switched to this page
+  await new Promise(r => setTimeout(r, 300));
+
+  // Everything ready — hide loading screen and start
+  loadingScreen.classList.add('fade-out');
   await new Promise(r => setTimeout(r, 800));
   loadingScreen.style.display = 'none';
 
-  showLogoOverlay('nos');
-  setTimeout(() => {
-    activateSlide(0);
-    setTimeout(() => hideLogoOverlay(), 400);
-  }, 1800);
+  activateSlide(0);
 }
 
 initSignage();
-
-// Refresh news every 60s
-setInterval(loadAll, 60000);
 </script>
 </body>
 </html>
