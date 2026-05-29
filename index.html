@@ -18,7 +18,7 @@
   }
 
   #wrapper {
-    width: 100vw; height: 100vh;
+    width: 2160px; height: 3840px;
     position: relative; overflow: hidden;
   }
 
@@ -64,42 +64,42 @@
     position: absolute; inset: 0; z-index: 2;
     display: flex; flex-direction: column;
     justify-content: flex-end;
-    padding: 5vh 5vw;
+    padding: 230.4px 129.6px;
   }
 
   .news-source-bar {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 2.5vh;
+    display: flex; align-items: center; gap: 25.9px;
+    margin-bottom: 96px;
   }
   .news-source-bar img.source-logo {
-    height: min(2.4vw, 3.8vh);
+    height: 69.1px;
     object-fit: contain;
   }
   .news-source-bar .news-ago {
-    font-size: min(0.9vw, 1.4vh);
+    font-size: 32.4px;
     color: rgba(255,255,255,0.4);
     font-weight: 500;
-    padding: 0.4vh 1vw;
+    padding: 19.2px 30.2px;
     background: rgba(255,255,255,0.08);
     border-radius: 100px;
     border: 1px solid rgba(255,255,255,0.06);
   }
 
   .news-title {
-    font-size: min(3.5vw, 5.5vh);
+    font-size: 140.4px;
     font-weight: 900; line-height: 1.15;
-    color: #fff; margin-bottom: 2vh;
-    max-width: 70%;
+    color: #fff; margin-bottom: 84.5px;
+    max-width: 92%;
     text-shadow: 0 2px 20px rgba(0,0,0,0.5);
   }
 
   .news-desc-area {
-    max-width: 55%; max-height: 18vh;
+    max-width: 90%; max-height: 921.6px;
     overflow: hidden; position: relative;
   }
   .news-desc-area p {
-    font-size: min(1.2vw, 1.9vh);
-    line-height: 1.8;
+    font-size: 54px;
+    line-height: 1.7;
     color: rgba(255,255,255,0.7);
     font-weight: 400;
   }
@@ -108,21 +108,21 @@
   .nos-accent .source-logo { filter: none; }
   .nos-accent::before {
     content: ''; position: absolute; bottom: 0; left: 0;
-    width: 100%; height: 4px; z-index: 3;
+    width: 100%; height: 19.2px; z-index: 3;
     background: linear-gradient(90deg, #f36d21, #f36d21 30%, transparent);
   }
   .nyt-accent .news-title { color: #f0f0f0; }
-  .nyt-accent .source-logo { filter: invert(1); height: min(1.8vw, 2.8vh) !important; }
+  .nyt-accent .source-logo { filter: invert(1); height: 51.8px !important; }
   .nyt-accent::before {
     content: ''; position: absolute; bottom: 0; left: 0;
-    width: 100%; height: 4px; z-index: 3;
+    width: 100%; height: 19.2px; z-index: 3;
     background: linear-gradient(90deg, #999, #999 30%, transparent);
   }
   .sky-accent .news-title { color: #e8eef8; }
   .sky-accent .source-logo { filter: none; }
   .sky-accent::before {
     content: ''; position: absolute; bottom: 0; left: 0;
-    width: 100%; height: 4px; z-index: 3;
+    width: 100%; height: 19.2px; z-index: 3;
     background: linear-gradient(90deg, #c41230, #c41230 30%, transparent);
   }
 
@@ -135,7 +135,7 @@
     z-index: 1;
     will-change: opacity;
     display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 2.5vh;
+    flex-direction: column; gap: 134.4px;
   }
   .intro-slide.active { opacity: 1; z-index: 2; }
   .intro-slide.prev { opacity: 0; z-index: 1; transition: opacity 2s ease-in-out; }
@@ -147,7 +147,7 @@
   .intro-bg.sky-bg { background: radial-gradient(ellipse at center, #1a050a 0%, #0a0a0a 70%); }
   .intro-glow {
     position: absolute;
-    width: 50vmax; height: 50vmax;
+    width: 1920px; height: 1920px;
     border-radius: 50%;
     opacity: 0.15;
   }
@@ -156,13 +156,13 @@
   .intro-glow.sky-glow { background: radial-gradient(circle, #c41230, transparent 70%); }
   .intro-logo {
     position: relative; z-index: 2;
-    height: min(8vw, 12vh);
+    height: 237.6px; max-width: 1512px;
     object-fit: contain;
   }
   .intro-logo.nyt-logo { filter: invert(1); }
   .intro-label {
     position: relative; z-index: 2;
-    font-size: min(1.8vw, 2.8vh);
+    font-size: 56.2px;
     font-weight: 500;
     letter-spacing: 0.3em;
     text-transform: uppercase;
@@ -170,7 +170,7 @@
   }
   .intro-line {
     position: relative; z-index: 2;
-    height: 2px; width: min(12vw, 150px);
+    height: 15.4px; width: 388.8px;
   }
   .intro-line.nos-line { background: #f36d21; }
   .intro-line.nyt-line { background: #999; }
@@ -181,15 +181,15 @@
     position: fixed; inset: 0; z-index: 100;
     background: #0a0a0a;
     display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 3vh;
+    flex-direction: column; gap: 115.2px;
     transition: opacity 0.8s ease;
   }
   #loading-screen.fade-out { opacity: 0; pointer-events: none; }
   .loading-logos {
-    display: flex; align-items: center; gap: 3vw;
+    display: flex; align-items: center; gap: 86.4px;
   }
   .loading-logos img {
-    height: min(3vw, 4.5vh);
+    height: 108px;
     object-fit: contain;
     opacity: 0.3;
     transition: opacity 0.5s ease;
@@ -197,16 +197,21 @@
   .loading-logos img.loaded { opacity: 1; }
   .loading-logos img.logo-nyt { filter: invert(1); }
   .loading-spinner {
-    width: min(3vw, 4vh); height: min(3vw, 4vh);
-    border: 2px solid rgba(255,255,255,0.1);
+    width: 108px; height: 108px;
+    border: 6.5px solid rgba(255,255,255,0.1);
     border-top-color: rgba(255,255,255,0.5);
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  /* ===== fit-to-screen canvas (2160x3840) ===== */
+  html,body{width:100%;height:100%;margin:0;padding:0;overflow:hidden;background:#000}
+  #viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#000}
+  #stage{width:2160px;height:3840px;flex:none;position:relative;overflow:hidden;transform-origin:center center;background:#000}
 </style>
 </head>
 <body>
+<div id="viewport"><div id="stage">
 
 <div id="loading-screen">
   <div class="loading-logos">
@@ -580,5 +585,7 @@ async function initSignage() {
 
 initSignage();
 </script>
+<script>(function(){function f(){var s=Math.min(window.innerWidth/2160,window.innerHeight/3840);var e=document.getElementById("stage");if(e)e.style.transform="scale("+s+")";}window.addEventListener("resize",f);window.addEventListener("orientationchange",f);f();})();</script>
+</div></div>
 </body>
 </html>
